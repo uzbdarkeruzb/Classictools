@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clock & Alarm</title>
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #1a237e, #283593);
+    color: #fff;
+    text-align: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+  }
+  h1 {
+    margin: 20px 0;
+    font-size: 2em;
+  }
+  .clock-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .digital {
+    font-size: 3em;
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+  }
+  canvas {
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    margin-bottom: 20px;
+  }
+  .alarm {
+    background: rgba(255,255,255,0.2);
+    padding: 15px;
+    border-radius: 10px;
+    display: inline-block;
+  }
+  input, button {
+    padding: 8px;
+    border-radius: 8px;
+    border: none;
+    margin: 5px;
+    font-size: 1em;
+  }
+  button {
+    background: #43a047;
+    color: #fff;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  button:hover {
+    background: #2e7d32;
+  }
+  .alert {
+    color: #ffeb3b;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+  <h1>🕒 Clock & Alarm</h1>
+  <div class="clock-container">
+    <div class="digital" id="digitalClock">00:00:00</div>
+    <canvas id="analogClock" width="200" height="200"></canvas>
+  </div>
+
+  <div class="alarm">
+    <h3>Set Alarm</h3>
+    <input type="time" id="alarmTime">
+    <button id="setAlarm">Set</button>
+    <button id="clearAlarm" style="background:#e53935;">Clear</button>
+    <div class="alert" id="alarmStatus">No alarm set</div>
+  </div>
+
+  <audio id="alarmSound">
+    <source src="https://www.soundjay.com/buttons/sounds/beep-07a.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    const digitalClock = document.getElementById("digitalClock");
+    const analogClock = document.getElementById("analogClock");
+    const ctx = analogClock.getContext("2d");
+    const alarmSound = document.getElementById("alarmSound");
+    const alarmTimeInput = document.getElementById("alarmTime");
+    const setAlarmBtn = document.getElementById("setAlarm");
+    const clearAlarmBtn = document.getElementById("clearAlarm");
+    const alarmStatus = document.getElementById("alarmStatus");
+
+    let alarmTime = null;
+    let alarmSet = false;
+
+    // Digital & Analog clock update
+    function updateClock() {
+      const now = new Date();
+      const h = now.getHours().toString().padStart(2, "0");
+      const m = now.getMinutes().toString().padStart(2, "0");
+      const s = now.getSeconds().toString().padStart(2, "0");
+      digitalClock.textContent = `${h}:${m}:${s}`;
+      drawAnalogClock(now);
+      checkAlarm(now);
+    }
+
+    function drawAnalogClock(now) {
+      const radius = analogClock.width / 2;
+      ctx.clearRect(0, 0, analogClock.width, analogClock.height);
+      ctx.translate(radius, radius);
+      ctx.rotate(-Math.PI / 2);
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 4;
+      ctx.lineCap = "round";
+
+      // Hour marks
+      ctx.save();
+      for (let i = 0; i < 12; i++) {
+        ctx.beginPath();
+        ctx.rotate(Math.PI / 6);
+        ctx.moveTo(radius - 10, 0);
+        ctx.lineTo(radius, 0);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Minute marks
+      ctx.save();
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 60; i++) {
+        if (i % 5 !== 0) {
+          ctx.beginPath();
+          ctx.moveTo(radius - 5, 0);
+          ctx.lineTo(radius, 0);
+          ctx.stroke();
+        }
+        ctx.rotate(Math.PI / 30);
+      }
+      ctx.restore();
+
+      // Hands
+      const sec = now.getSeconds();
+      const min = now.getMinutes();
+      const hr = now.getHours() % 12;
+      ctx.fillStyle = "#fff";
+
+      // Hour hand
+      ctx.save();
+      ctx.rotate((Math.PI / 6) * hr + (Math.PI / 360) * min + (Math.PI / 21600) * sec);
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(-10, 0);
+      ctx.lineTo(radius * 0.5, 0);
+      ctx.stroke();
+      ctx.restore();
+
+      // Minute hand
+      ctx.save();
+      ctx.rotate((Math.PI / 30) * min + (Math.PI / 1800) * sec);
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(-15, 0);
+      ctx.lineTo(radius * 0.7, 0);
+      ctx.stroke();
+      ctx.restore();
+
+      // Second hand
+      ctx.save();
+      ctx.strokeStyle = "#ff3d00";
+      ctx.rotate(sec * Math.PI / 30);
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-20, 0);
+      ctx.lineTo(radius * 0.8, 0);
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.rotate(Math.PI / 2);
+      ctx.translate(-radius, -radius);
+    }
+
+    // Alarm system
+    setAlarmBtn.onclick = () => {
+      if (alarmTimeInput.value) {
+        alarmTime = alarmTimeInput.value;
+        alarmSet = true;
+        alarmStatus.textContent = `Alarm set for ${alarmTime}`;
+      }
+    };
+
+    clearAlarmBtn.onclick = () => {
+      alarmSet = false;
+      alarmStatus.textContent = "No alarm set";
+      alarmSound.pause();
+      alarmSound.currentTime = 0;
+    };
+
+    function checkAlarm(now) {
+      if (alarmSet) {
+        const current = `${now.getHours().toString().padStart(2,"0")}:${now.getMinutes().toString().padStart(2,"0")}`;
+        if (current === alarmTime) {
+          alarmSound.play();
+          alarmSet = false;
+          alarmStatus.textContent = "⏰ Alarm ringing!";
+        }
+      }
+    }
+
+    setInterval(updateClock, 1000);
+  </script>
+</body>
+</html>

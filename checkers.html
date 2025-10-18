@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkers — PvP</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(120deg, #00c6ff, #0072ff);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100vh;
+  color: #fff;
+  overflow: hidden;
+}
+h1 {
+  margin: 10px 0;
+  font-size: 1.8em;
+}
+button {
+  font-size: 1em;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+#board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  aspect-ratio: 1 / 1;
+  width: 95vw;
+  max-width: 600px;
+  border: 4px solid #fff;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dark { background-color: #444; }
+.light { background-color: #eee; }
+.piece {
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.piece:hover { transform: scale(1.1); }
+.red { background-color: #ff4d4d; }
+.black { background-color: #111; }
+.king { box-shadow: 0 0 0 3px gold inset; }
+</style>
+</head>
+<body>
+
+<h1>♟️ Checkers — PvP</h1>
+<button onclick="startGame()">🔁 Yangi o‘yin</button>
+<div id="board"></div>
+
+<script>
+const board = document.getElementById("board");
+let cells = [], selectedPiece = null, currentPlayer = "red";
+
+function createBoard() {
+  board.innerHTML = "";
+  cells = [];
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const cell = document.createElement("div");
+      cell.className = "cell " + ((r + c) % 2 ? "dark" : "light");
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+      cell.addEventListener("click", () => onCellClick(r, c));
+      board.appendChild(cell);
+      cells.push(cell);
+    }
+  }
+}
+
+function getCell(r, c) {
+  return cells.find(x => +x.dataset.row === r && +x.dataset.col === c);
+}
+
+function setupPieces() {
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      if ((r + c) % 2) {
+        if (r < 3) addPiece("black", r, c);
+        if (r > 4) addPiece("red", r, c);
+      }
+    }
+  }
+}
+
+function addPiece(color, r, c) {
+  const piece = document.createElement("div");
+  piece.className = "piece " + color;
+  piece.dataset.color = color;
+  piece.dataset.row = r;
+  piece.dataset.col = c;
+  piece.addEventListener("click", e => {
+    e.stopPropagation();
+    if (piece.dataset.color !== currentPlayer) return;
+    onPieceClick(piece);
+  });
+  getCell(r, c).appendChild(piece);
+}
+
+function onPieceClick(piece) {
+  if (selectedPiece) selectedPiece.style.outline = "";
+  selectedPiece = piece;
+  piece.style.outline = "3px solid yellow";
+}
+
+function onCellClick(r, c) {
+  if (!selectedPiece) return;
+  movePiece(selectedPiece, r, c);
+}
+
+function movePiece(piece, newRow, newCol) {
+  const oldRow = +piece.dataset.row;
+  const oldCol = +piece.dataset.col;
+  const color = piece.dataset.color;
+  const enemyColor = color === "red" ? "black" : "red";
+  const rowDiff = newRow - oldRow;
+  const colDiff = newCol - oldCol;
+  const cell = getCell(newRow, newCol);
+  if (!cell || cell.firstChild) return;
+
+  const captures = getAvailableCaptures(color);
+  const isCapture = Math.abs(rowDiff) === 2 && Math.abs(colDiff) === 2;
+
+  if (captures.length > 0 && !isCapture) {
+    alert("⚠️ Avval urishingiz kerak!");
+    return;
+  }
+
+  if (isCapture) {
+    const midRow = (oldRow + newRow) / 2;
+    const midCol = (oldCol + newCol) / 2;
+    const midCell = getCell(midRow, midCol);
+    const midPiece = midCell.firstChild;
+    if (midPiece && midPiece.dataset.color === enemyColor) {
+      midCell.removeChild(midPiece);
+      doMove(piece, newRow, newCol);
+      const more = canCapture(piece);
+      if (!more) switchTurn();
+      return;
+    }
+  }
+
+  if (Math.abs(rowDiff) === 1 && Math.abs(colDiff) === 1 && captures.length === 0) {
+    doMove(piece, newRow, newCol);
+    switchTurn();
+  }
+}
+
+function doMove(piece, r, c) {
+  getCell(+piece.dataset.row, +piece.dataset.col).innerHTML = "";
+  piece.dataset.row = r;
+  piece.dataset.col = c;
+  getCell(r, c).appendChild(piece);
+  piece.style.outline = "";
+  selectedPiece = null;
+  if ((piece.dataset.color === "red" && r === 0) || (piece.dataset.color === "black" && r === 7))
+    piece.classList.add("king");
+  checkWin();
+}
+
+function getAvailableCaptures(color) {
+  const pieces = [...document.querySelectorAll(".piece." + color)];
+  return pieces.filter(p => canCapture(p));
+}
+
+function canCapture(piece) {
+  const r = +piece.dataset.row, c = +piece.dataset.col;
+  const color = piece.dataset.color;
+  const enemy = color === "red" ? "black" : "red";
+  const dirs = piece.classList.contains("king")
+    ? [[1,1],[1,-1],[-1,1],[-1,-1]]
+    : (color === "red" ? [[-1,1],[-1,-1]] : [[1,1],[1,-1]]);
+  for (const [dr,dc] of dirs) {
+    const r1 = r + dr, c1 = c + dc, r2 = r + dr*2, c2 = c + dc*2;
+    const mid = getCell(r1, c1), dest = getCell(r2, c2);
+    if (mid && dest && mid.firstChild && mid.firstChild.dataset.color === enemy && !dest.firstChild)
+      return true;
+  }
+  return false;
+}
+
+function switchTurn() {
+  currentPlayer = currentPlayer === "red" ? "black" : "red";
+}
+
+function checkWin() {
+  const reds = document.querySelectorAll(".piece.red").length;
+  const blacks = document.querySelectorAll(".piece.black").length;
+  if (reds === 0 || blacks === 0) {
+    setTimeout(() => {
+      alert((reds === 0 ? "⚫ Qora" : "🔴 Qizil") + " g‘olib bo‘ldi!");
+      startGame();
+    }, 200);
+  }
+}
+
+function startGame() {
+  createBoard();
+  setupPieces();
+  currentPlayer = "red";
+}
+startGame();
+</script>
+
+</body>
+</html>

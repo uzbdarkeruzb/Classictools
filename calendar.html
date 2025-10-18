@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalendar & Soat — Classic Tools</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(120deg, #0072ff, #00c6ff);
+      color: white;
+      text-align: center;
+      padding: 30px;
+    }
+    h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+    #clock {
+      font-size: 26px;
+      margin-bottom: 20px;
+      background: rgba(255,255,255,0.15);
+      padding: 10px 20px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+    .calendar {
+      background: rgba(255,255,255,0.15);
+      border-radius: 15px;
+      padding: 20px;
+      display: inline-block;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    select, button {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+    }
+    button {
+      background: #004aad;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #002f6c;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th {
+      font-weight: bold;
+      padding: 8px 0;
+      color: #fff;
+    }
+    td {
+      width: 14%;
+      padding: 10px;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: 0.2s;
+    }
+    td:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    .today {
+      background: #004aad;
+      font-weight: bold;
+    }
+    #noteBox {
+      background: rgba(255,255,255,0.2);
+      padding: 10px;
+      border-radius: 10px;
+      margin-top: 20px;
+      display: none;
+    }
+    textarea {
+      width: 90%;
+      height: 60px;
+      border-radius: 8px;
+      border: none;
+      padding: 8px;
+      font-size: 14px;
+      resize: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📅 Kalendar & ⏰ Soat</h1>
+
+  <div id="clock">--:--:--</div>
+
+  <div class="calendar">
+    <div class="header">
+      <button onclick="prevMonth()">⬅️</button>
+      <div>
+        <select id="monthSelect"></select>
+        <select id="yearSelect"></select>
+      </div>
+      <button onclick="nextMonth()">➡️</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Du</th><th>Se</th><th>Ch</th><th>Pa</th><th>Ju</th><th>Sh</th><th>Ya</th>
+        </tr>
+      </thead>
+      <tbody id="calendarBody"></tbody>
+    </table>
+  </div>
+
+  <div id="noteBox">
+    <h3>📝 <span id="noteDate"></span> sanasi uchun eslatma:</h3>
+    <textarea id="noteText" placeholder="Eslatma yozing..."></textarea><br>
+    <button onclick="saveNote()">💾 Saqlash</button>
+  </div>
+
+  <script>
+    // ⏰ Real vaqt soati
+    function updateClock() {
+      const now = new Date();
+      let h = String(now.getHours()).padStart(2, "0");
+      let m = String(now.getMinutes()).padStart(2, "0");
+      let s = String(now.getSeconds()).padStart(2, "0");
+      document.getElementById("clock").textContent = `${h}:${m}:${s}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // 📆 Kalendar
+    const monthNames = [
+      "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun",
+      "Iyul", "Avgust", "Sentabr", "Oktabr", "Noyabr", "Dekabr"
+    ];
+    const monthSelect = document.getElementById("monthSelect");
+    const yearSelect = document.getElementById("yearSelect");
+    const calendarBody = document.getElementById("calendarBody");
+
+    for (let i = 0; i < 12; i++) {
+      const opt = document.createElement("option");
+      opt.value = i;
+      opt.textContent = monthNames[i];
+      monthSelect.appendChild(opt);
+    }
+    for (let y = 2000; y <= 2060; y++) {
+      const opt = document.createElement("option");
+      opt.value = y;
+      opt.textContent = y;
+      yearSelect.appendChild(opt);
+    }
+
+    let today = new Date();
+    let currentMonth = today.getMonth();
+    let currentYear = today.getFullYear();
+    monthSelect.value = currentMonth;
+    yearSelect.value = currentYear;
+
+    function generateCalendar(month, year) {
+      calendarBody.innerHTML = "";
+      const firstDay = new Date(year, month).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      let date = 1;
+
+      for (let i = 0; i < 6; i++) {
+        const row = document.createElement("tr");
+        for (let j = 1; j <= 7; j++) {
+          const cell = document.createElement("td");
+          const realFirstDay = firstDay === 0 ? 7 : firstDay;
+          if ((i === 0 && j < realFirstDay) || date > daysInMonth) {
+            cell.textContent = "";
+          } else {
+            cell.textContent = date;
+            cell.onclick = () => openNote(date, month, year);
+            if (
+              date === today.getDate() &&
+              year === today.getFullYear() &&
+              month === today.getMonth()
+            ) cell.classList.add("today");
+            date++;
+          }
+          row.appendChild(cell);
+        }
+        calendarBody.appendChild(row);
+      }
+    }
+
+    function prevMonth() {
+      if (currentMonth === 0) {
+        currentMonth = 11;
+        currentYear--;
+      } else currentMonth--;
+      if (currentYear < 2000) currentYear = 2000;
+      monthSelect.value = currentMonth;
+      yearSelect.value = currentYear;
+      generateCalendar(currentMonth, currentYear);
+    }
+
+    function nextMonth() {
+      if (currentMonth === 11) {
+        currentMonth = 0;
+        currentYear++;
+      } else currentMonth++;
+      if (currentYear > 2060) currentYear = 2060;
+      monthSelect.value = currentMonth;
+      yearSelect.value = currentYear;
+      generateCalendar(currentMonth, currentYear);
+    }
+
+    monthSelect.addEventListener("change", () => {
+      currentMonth = parseInt(monthSelect.value);
+      generateCalendar(currentMonth, currentYear);
+    });
+    yearSelect.addEventListener("change", () => {
+      currentYear = parseInt(yearSelect.value);
+      generateCalendar(currentMonth, currentYear);
+    });
+
+    generateCalendar(currentMonth, currentYear);
+
+    // 📝 Eslatma funksiyasi
+    function openNote(day, month, year) {
+      const noteBox = document.getElementById("noteBox");
+      noteBox.style.display = "block";
+      const key = `${day}-${month+1}-${year}`;
+      document.getElementById("noteDate").textContent = key;
+      document.getElementById("noteText").value = localStorage.getItem(key) || "";
+    }
+
+    function saveNote() {
+      const key = document.getElementById("noteDate").textContent;
+      const text = document.getElementById("noteText").value;
+      localStorage.setItem(key, text);
+      alert("💾 Eslatma saqlandi!");
+    }
+  </script>
+
+</body>
+</html>

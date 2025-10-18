@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Universal Converter</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #1e1f29, #3e3f4c);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+  }
+  h1 { margin-bottom: 15px; }
+  .converter {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+  }
+  input, select, button {
+    margin: 6px;
+    padding: 8px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+  }
+  select {
+    background: #444;
+    color: white;
+  }
+  input {
+    width: 120px;
+    text-align: center;
+  }
+  button {
+    background: #2ecc71;
+    color: white;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  button:hover { background: #27ae60; }
+  h2 { margin-top: 15px; color: #f1c40f; }
+</style>
+</head>
+<body>
+
+<h1>🌐 Universal Converter</h1>
+
+<div class="converter">
+  <select id="category" onchange="updateUnits()">
+    <option value="length">Uzunlik</option>
+    <option value="mass">Og‘irlik</option>
+    <option value="volume">Hajm</option>
+    <option value="time">Vaqt</option>
+    <option value="temperature">Harorat</option>
+    <option value="speed">Tezlik</option>
+    <option value="currency">Valyuta</option>
+  </select>
+  <br>
+  <input type="number" id="inputValue" placeholder="Qiymat">
+  <br>
+  <select id="fromUnit"></select>
+  ⟶
+  <select id="toUnit"></select>
+  <br>
+  <button onclick="convert()">Hisobla</button>
+  <h2 id="result">Natija shu yerda chiqadi</h2>
+</div>
+
+<script>
+const units = {
+  length: ["mm","cm","m","km","inch","foot","yard","mile"],
+  mass: ["mg","g","kg","ton","lb","oz"],
+  volume: ["B","KB","MB","GB","TB"],
+  time: ["s","min","h","day","week","year"],
+  temperature: ["C","F","K"],
+  speed: ["m/s","km/h","mph","knot"],
+  currency: ["USD","EUR","UZS","RUB","GBP","JPY"]
+};
+
+function updateUnits() {
+  const cat = document.getElementById("category").value;
+  const fromSel = document.getElementById("fromUnit");
+  const toSel = document.getElementById("toUnit");
+  fromSel.innerHTML = "";
+  toSel.innerHTML = "";
+  units[cat].forEach(u => {
+    fromSel.innerHTML += `<option value="${u}">${u}</option>`;
+    toSel.innerHTML += `<option value="${u}">${u}</option>`;
+  });
+}
+updateUnits();
+
+async function convert() {
+  const cat = document.getElementById("category").value;
+  const value = parseFloat(document.getElementById("inputValue").value);
+  const from = document.getElementById("fromUnit").value;
+  const to = document.getElementById("toUnit").value;
+  const resultEl = document.getElementById("result");
+
+  if (isNaN(value)) {
+    resultEl.textContent = "❌ Qiymat kiriting!";
+    return;
+  }
+
+  let result;
+  switch(cat) {
+    case "length":
+      const len = {mm:0.001, cm:0.01, m:1, km:1000, inch:0.0254, foot:0.3048, yard:0.9144, mile:1609.34};
+      result = value * len[from] / len[to];
+      break;
+    case "mass":
+      const mass = {mg:0.001, g:1, kg:1000, ton:1e6, lb:453.592, oz:28.3495};
+      result = value * mass[from] / mass[to];
+      break;
+    case "volume":
+      const vol = {B:1, KB:1024, MB:1024**2, GB:1024**3, TB:1024**4};
+      result = value * vol[from] / vol[to];
+      break;
+    case "time":
+      const time = {s:1, min:60, h:3600, day:86400, week:604800, year:31536000};
+      result = value * time[from] / time[to];
+      break;
+    case "temperature":
+      if (from === to) result = value;
+      else if (from === "C" && to === "F") result = value * 9/5 + 32;
+      else if (from === "F" && to === "C") result = (value - 32) * 5/9;
+      else if (from === "C" && to === "K") result = value + 273.15;
+      else if (from === "K" && to === "C") result = value - 273.15;
+      else if (from === "F" && to === "K") result = (value - 32) * 5/9 + 273.15;
+      else if (from === "K" && to === "F") result = (value - 273.15) * 9/5 + 32;
+      break;
+    case "speed":
+      const speed = {"m/s":1, "km/h":0.277778, "mph":0.44704, "knot":0.514444};
+      result = value * speed[from] / speed[to];
+      break;
+    case "currency":
+      resultEl.textContent = "⏳ Yuklanmoqda...";
+      const res = await fetch(`https://api.exchangerate.host/convert?from=${from}&to=${to}&amount=${value}`);
+      const data = await res.json();
+      result = data.result;
+      break;
+  }
+
+  resultEl.textContent = `🔹 Natija: ${result.toLocaleString("uz-UZ")} ${to}`;
+}
+</script>
+
+</body>
+</html>

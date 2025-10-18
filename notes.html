@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notes</title>
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #1e1f2b, #2c3e50);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  h1 {
+    margin-bottom: 15px;
+  }
+  .note-input {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255,255,255,0.1);
+    padding: 15px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.4);
+  }
+  input, textarea, button {
+    margin: 5px;
+    padding: 8px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    width: 100%;
+  }
+  textarea {
+    height: 100px;
+    resize: none;
+  }
+  button {
+    background: #2ecc71;
+    color: white;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  button:hover {
+    background: #27ae60;
+  }
+  .notes-list {
+    margin-top: 20px;
+    width: 90%;
+    max-width: 500px;
+  }
+  .note {
+    background: rgba(255,255,255,0.1);
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    position: relative;
+    transition: transform 0.2s;
+  }
+  .note:hover {
+    transform: scale(1.02);
+  }
+  .note h3 {
+    margin: 0 0 5px;
+    color: #f1c40f;
+    word-wrap: break-word;
+  }
+  .note p {
+    margin: 0;
+    word-wrap: break-word;
+  }
+  .delete-btn {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    background: transparent;
+    color: #ff4d4d;
+    font-size: 20px;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .delete-btn:hover {
+    color: #ff0000;
+    transform: scale(1.2);
+  }
+</style>
+</head>
+<body>
+
+<h1>📝 Notes</h1>
+
+<div class="note-input">
+  <input type="text" id="title" placeholder="Sarlavha">
+  <textarea id="content" placeholder="Matn..."></textarea>
+  <button onclick="addNote()">Saqlash</button>
+</div>
+
+<div class="notes-list" id="notesList"></div>
+
+<script>
+function loadNotes(){
+  const notes = JSON.parse(localStorage.getItem("notes") || "[]");
+  const list = document.getElementById("notesList");
+  list.innerHTML = "";
+  notes.forEach((note, i)=>{
+    const div = document.createElement("div");
+    div.className = "note";
+    div.innerHTML = `
+      <button class="delete-btn" onclick="deleteNote(${i})">❌</button>
+      <h3>${note.title || "Sarlavhasiz"}</h3>
+      <p>${note.content || ""}</p>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function addNote(){
+  const title = document.getElementById("title").value.trim();
+  const content = document.getElementById("content").value.trim();
+  if(!title && !content) return alert("❌ Hech narsa yozilmadi!");
+  const notes = JSON.parse(localStorage.getItem("notes") || "[]");
+  notes.push({title, content});
+  localStorage.setItem("notes", JSON.stringify(notes));
+  document.getElementById("title").value = "";
+  document.getElementById("content").value = "";
+  loadNotes();
+}
+
+function deleteNote(i){
+  const notes = JSON.parse(localStorage.getItem("notes") || "[]");
+  notes.splice(i, 1);
+  localStorage.setItem("notes", JSON.stringify(notes));
+  loadNotes();
+}
+
+window.onload = loadNotes;
+</script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #141E30, #243B55);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    h1 {
+      text-shadow: 2px 2px 4px #000;
+      margin-bottom: 15px;
+    }
+
+    .calculator {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+      width: 290px;
+    }
+
+    input {
+      width: 100%;
+      height: 55px;
+      font-size: 22px;
+      text-align: right;
+      border: none;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      background: rgba(255,255,255,0.85);
+      color: black;
+      padding-right: 10px;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    button {
+      height: 50px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .equal {
+      background: #2ecc71;
+    }
+
+    .clear {
+      background: #e74c3c;
+    }
+
+    .func {
+      background: #3498db;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🧮 Smart Calculator</h1>
+
+  <div class="calculator">
+    <input type="text" id="display" disabled>
+
+    <div class="buttons">
+      <button class="clear" onclick="clearDisplay()">C</button>
+      <button onclick="back()">⌫</button>
+      <button class="func" onclick="square()">x²</button>
+      <button class="func" onclick="sqrt()">√</button>
+      <button class="func" onclick="append('%')">%</button>
+
+      <button class="func" onclick="append('sin(')">sin</button>
+      <button class="func" onclick="append('cos(')">cos</button>
+      <button class="func" onclick="append('tan(')">tan</button>
+      <button class="func" onclick="inverse()">1/x</button>
+      <button onclick="append('/')">÷</button>
+
+      <button onclick="append('7')">7</button>
+      <button onclick="append('8')">8</button>
+      <button onclick="append('9')">9</button>
+      <button onclick="append('*')">×</button>
+      <button class="func" onclick="append('(')">(</button>
+
+      <button onclick="append('4')">4</button>
+      <button onclick="append('5')">5</button>
+      <button onclick="append('6')">6</button>
+      <button onclick="append('-')">−</button>
+      <button class="func" onclick="append(')')">)</button>
+
+      <button onclick="append('1')">1</button>
+      <button onclick="append('2')">2</button>
+      <button onclick="append('3')">3</button>
+      <button onclick="append('+')">+</button>
+      <button class="equal" onclick="calculate()">=</button>
+
+      <button onclick="append('0')" style="grid-column: span 2;">0</button>
+      <button onclick="append('.')">.</button>
+      <button class="func" onclick="pi()">π</button>
+      <button class="func" onclick="exp()">e</button>
+    </div>
+  </div>
+
+  <script>
+    const display = document.getElementById("display");
+    const MAX_VAL = 1.13463346e+150;
+    const MIN_VAL = 1.13463346e-150;
+
+    function append(value) {
+      display.value += value;
+    }
+
+    function clearDisplay() {
+      display.value = "";
+    }
+
+    function back() {
+      display.value = display.value.slice(0, -1);
+    }
+
+    function sqrt() {
+      try {
+        const val = eval(display.value);
+        if (val < 0) {
+          display.value = "Error";
+          return;
+        }
+        const result = Math.sqrt(val);
+        checkLimit(result);
+      } catch {
+        display.value = "Error";
+      }
+    }
+
+    function square() {
+      try {
+        const val = eval(display.value);
+        const result = val * val;
+        checkLimit(result);
+      } catch {
+        display.value = "Error";
+      }
+    }
+
+    function inverse() {
+      try {
+        const val = eval(display.value);
+        if (val === 0) {
+          display.value = "Error";
+          return;
+        }
+        const result = 1 / val;
+        checkLimit(result);
+      } catch {
+        display.value = "Error";
+      }
+    }
+
+    function pi() {
+      display.value += Math.PI.toFixed(8);
+    }
+
+    function exp() {
+      display.value += Math.E.toFixed(8);
+    }
+
+    function calculate() {
+      try {
+        const replaced = display.value
+          .replace(/sin\(/g, "Math.sin(")
+          .replace(/cos\(/g, "Math.cos(")
+          .replace(/tan\(/g, "Math.tan(");
+        const result = eval(replaced);
+        checkLimit(result);
+      } catch {
+        display.value = "Error";
+      }
+    }
+
+    function checkLimit(result) {
+      if (Math.abs(result) > MAX_VAL || Math.abs(result) < MIN_VAL && result !== 0) {
+        display.value = "Error";
+      } else {
+        display.value = Number(result.toPrecision(10));
+      }
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧠 Memory Game</title>
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  color: #fff;
+  height: 100vh;
+  overflow: hidden;
+}
+h1 {
+  margin: 10px;
+}
+#game {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-gap: 10px;
+  width: 90vw;
+  max-width: 500px;
+}
+.card {
+  background: #333;
+  border-radius: 12px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2em;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.3s;
+}
+.card.flipped {
+  background: #fff;
+  color: #333;
+  transform: rotateY(180deg);
+}
+.card.matched {
+  background: #32cd32;
+  color: #fff;
+  cursor: default;
+}
+#stats {
+  margin-top: 10px;
+  font-size: 1.2em;
+  text-align: center;
+}
+button {
+  margin-top: 10px;
+  font-size: 1em;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+}
+button:hover {
+  background: #f1f1f1;
+}
+</style>
+</head>
+<body>
+
+<h1>🧠 Memory Game</h1>
+<div id="game"></div>
+<div id="stats">
+  Harakatlar: <span id="moves">0</span> | 
+  ⏱️ Vaqt: <span id="timer">0.0</span> s <br>
+  🏆 Eng yaxshi: <span id="best">—</span> s
+</div>
+<button onclick="startGame()">🔁 Qayta boshlash</button>
+
+<script>
+const emojis = ["🍎","🍌","🍇","🍒","🍉","🥝","🍓","🍍"];
+let cards = [], firstCard = null, lock = false, moves = 0;
+let timer = 0, timerInterval, gameStarted = false;
+
+function startGame() {
+  const game = document.getElementById("game");
+  const movesDisplay = document.getElementById("moves");
+  const timerDisplay = document.getElementById("timer");
+  moves = 0;
+  movesDisplay.textContent = 0;
+  timer = 0;
+  timerDisplay.textContent = "0.0";
+  clearInterval(timerInterval);
+  firstCard = null;
+  lock = true; 
+  gameStarted = false;
+
+  const best = localStorage.getItem("bestTime");
+  document.getElementById("best").textContent = best ? best : "—";
+
+  const deck = [...emojis, ...emojis]
+    .sort(() => Math.random() - 0.5)
+    .map(icon => ({ icon, matched: false }));
+
+  game.innerHTML = "";
+  deck.forEach((item, index) => {
+    const card = document.createElement("div");
+    card.classList.add("card");
+    card.dataset.icon = item.icon;
+    card.addEventListener("click", () => flipCard(card));
+    game.appendChild(card);
+  });
+  cards = document.querySelectorAll(".card");
+
+  // 🔹 Avval 1.5 sekundga hammasi ochiladi
+  cards.forEach(card => {
+    card.textContent = card.dataset.icon;
+    card.classList.add("flipped");
+  });
+
+  setTimeout(() => {
+    cards.forEach(card => {
+      card.textContent = "";
+      card.classList.remove("flipped");
+    });
+    lock = false; 
+  }, 1500);
+}
+
+function startTimer() {
+  gameStarted = true;
+  timerInterval = setInterval(() => {
+    timer += 0.1;
+    document.getElementById("timer").textContent = timer.toFixed(1);
+  }, 100);
+}
+
+function flipCard(card) {
+  if (lock || card.classList.contains("flipped") || card.classList.contains("matched")) return;
+  if (!gameStarted) startTimer();
+  card.textContent = card.dataset.icon;
+  card.classList.add("flipped");
+
+  if (!firstCard) {
+    firstCard = card;
+  } else {
+    moves++;
+    document.getElementById("moves").textContent = moves;
+    if (card.dataset.icon === firstCard.dataset.icon) {
+      card.classList.add("matched");
+      firstCard.classList.add("matched");
+      firstCard = null;
+      checkWin();
+    } else {
+      lock = true;
+      setTimeout(() => {
+        card.textContent = "";
+        firstCard.textContent = "";
+        card.classList.remove("flipped");
+        firstCard.classList.remove("flipped");
+        firstCard = null;
+        lock = false;
+      }, 800);
+    }
+  }
+}
+
+function checkWin() {
+  const matched = document.querySelectorAll(".matched").length;
+  if (matched === cards.length) {
+    clearInterval(timerInterval);
+    setTimeout(() => {
+      alert(`🎉 Tabriklayman! Siz ${moves} harakatda va ${timer.toFixed(1)} sekundda yutdingiz!`);
+      const best = localStorage.getItem("bestTime");
+      if (!best || timer < parseFloat(best)) {
+        localStorage.setItem("bestTime", timer.toFixed(1));
+        document.getElementById("best").textContent = timer.toFixed(1);
+        alert("🏆 Yangi rekord o‘rnatildi!");
+      }
+    }, 300);
+  }
+}
+
+startGame();
+</script>
+
+</body>
+</html>

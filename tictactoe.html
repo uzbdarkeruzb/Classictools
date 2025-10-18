@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tic Tac Toe — Classic Tools</title>
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #00b4db, #0083b0);
+    color: white;
+    text-align: center;
+    padding: 30px;
+  }
+  h1 {
+    font-size: 28px;
+    margin-bottom: 10px;
+  }
+  #board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  .cell {
+    width: 100px;
+    height: 100px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    font-size: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .cell:hover {
+    background: rgba(255,255,255,0.2);
+  }
+  #status {
+    font-size: 20px;
+    margin-top: 20px;
+  }
+  button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    background: #006ba1;
+    color: white;
+    cursor: pointer;
+  }
+  button:hover {
+    background: #00557c;
+  }
+</style>
+</head>
+<body>
+
+<h1>Tic Tac Toe 🎮</h1>
+<div id="board"></div>
+<div id="status">O‘yin boshlang!</div>
+<button onclick="resetGame()">Qayta o‘ynash</button>
+
+<script>
+const board = document.getElementById("board");
+const statusText = document.getElementById("status");
+let cells = [];
+let currentPlayer = "X";
+let gameActive = true;
+
+function createBoard() {
+  board.innerHTML = "";
+  cells = [];
+  for (let i = 0; i < 9; i++) {
+    const cell = document.createElement("div");
+    cell.classList.add("cell");
+    cell.dataset.index = i;
+    cell.addEventListener("click", handleClick);
+    board.appendChild(cell);
+    cells.push("");
+  }
+}
+createBoard();
+
+function handleClick(e) {
+  const index = e.target.dataset.index;
+  if (cells[index] !== "" || !gameActive) return;
+  cells[index] = currentPlayer;
+  e.target.textContent = currentPlayer;
+  checkWinner();
+  currentPlayer = currentPlayer === "X" ? "O" : "X";
+  if (gameActive) statusText.textContent = `Navbat: ${currentPlayer}`;
+}
+
+function checkWinner() {
+  const winCombos = [
+    [0,1,2], [3,4,5], [6,7,8], // gorizontal
+    [0,3,6], [1,4,7], [2,5,8], // vertikal
+    [0,4,8], [2,4,6]           // diagonal
+  ];
+
+  for (let combo of winCombos) {
+    const [a,b,c] = combo;
+    if (cells[a] && cells[a] === cells[b] && cells[a] === cells[c]) {
+      statusText.textContent = `G‘olib: ${cells[a]} 🎉`;
+      gameActive = false;
+      return;
+    }
+  }
+
+  if (!cells.includes("")) {
+    statusText.textContent = "Durrang! 🤝";
+    gameActive = false;
+  }
+}
+
+function resetGame() {
+  currentPlayer = "X";
+  gameActive = true;
+  statusText.textContent = "O‘yin boshlang!";
+  createBoard();
+}
+</script>
+
+</body>
+</html>

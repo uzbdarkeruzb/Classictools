@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Universal App Hub</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #d1eaff, #f5f9ff);
+      color: #222;
+      text-align: center;
+    }
+
+    header {
+      background: #0078d7;
+      color: white;
+      padding: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #languageSelector {
+      font-size: 16px;
+      padding: 5px 10px;
+      border-radius: 5px;
+      border: none;
+      outline: none;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+      padding: 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .app-card {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .app-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .app-card a {
+      text-decoration: none;
+      color: #0078d7;
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+    }
+
+    footer {
+      background: #0078d7;
+      color: white;
+      padding: 10px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span id="title">Universal App Hub</span>
+    <select id="languageSelector">
+      <option value="uz">🇺🇿 O'zbekcha</option>
+      <option value="en">🇬🇧 English</option>
+      <option value="ru">🇷🇺 Русский</option>
+      <option value="es">🇪🇸 Español</option>
+      <option value="fr">🇫🇷 Français</option>
+      <option value="de">🇩🇪 Deutsch</option>
+      <option value="tr">🇹🇷 Türkçe</option>
+      <option value="it">🇮🇹 Italiano</option>
+      <option value="zh">🇨🇳 中文</option>
+      <option value="ar">🇸🇦 العربية</option>
+    </select>
+  </header>
+
+  <main>
+    
+    <div class="app-card"><h3 data-key="calendar">Kalendar</h3><a href="calendar.html">Ochilish</a></div>
+    <div class="app-card"><h3 data-key="converter">Konverter</h3><a href="converter.html">Ochilish</a></div>
+    <div class="app-card"><h3 data-key="calculator">Kalkulyator</h3><a href="calculator.html">Ochilish</a></div>
+    <div class="app-card"><h3 data-key="notes">Eslatmalar</h3><a href="notes.html">Ochilish</a></div>
+    <div class="app-card"><h3 data-key="stopwatch">Sekundomer</h3><a href="stopwatch.html">Ochilish</a></div>
+    <div class="app-card"><h3 data-key="timer">Taymer</h3><a href="timer.html">Ochilish</a></div>
+    <div class="app-card"><h3 data-key="password">Parol generator</h3><a href="password.html">Ochilish</a></div>
+    <div class="app-card"><h3 data-key="clock">Soat</h3><a href="clock.html">Ochilish</a></div>
+   
+    <div class="app-card"><h3 data-key="memory">Xotira o'yini</h3><a href="memory.html">Ochilish</a></div>
+    <div class="app-card"><h3 data-key="checkers">Dama o'yini</h3><a href="checkers.html">Ochilish</a></div>
+    <div class="app-card"><h3 data-key="quiz">Tezkor savol-javob</h3><a href="quiz.html">Ochilish</a></div>
+  </main>
+
+  <footer>
+    <p>© 2025 Universal App Hub</p>
+  </footer>
+
+  <script>
+    const translations = {
+      uz: {title:"Universal Ilovalar Markazi",translator:"Tarjima tizimi",calendar:"Kalendar",converter:"Konverter",calculator:"Kalkulyator",notes:"Eslatmalar",stopwatch:"Sekundomer",timer:"Taymer",password:"Parol generator",clock:"Soat",textEditor:"Matn muharriri",memory:"Xotira o'yini",checkers:"Dama o'yini",quiz:"Tezkor savol-javob"},
+      en: {title:"Universal App Hub",translator:"Translator",calendar:"Calendar",converter:"Converter",calculator:"Calculator",notes:"Notes",stopwatch:"Stopwatch",timer:"Timer",password:"Password Generator",clock:"Clock",textEditor:"Text Editor",memory:"Memory Game",checkers:"Checkers",quiz:"Quick Quiz"},
+      ru: {title:"Центр Универсальных Приложений",translator:"Переводчик",calendar:"Календарь",converter:"Конвертер",calculator:"Калькулятор",notes:"Заметки",stopwatch:"Секундомер",timer:"Таймер",password:"Генератор паролей",clock:"Часы",textEditor:"Текстовый редактор",memory:"Игра на память",checkers:"Шашки",quiz:"Быстрый опрос"},
+      es: {title:"Centro de Aplicaciones",translator:"Traductor",calendar:"Calendario",converter:"Convertidor",calculator:"Calculadora",notes:"Notas",stopwatch:"Cronómetro",timer:"Temporizador",password:"Generador de contraseñas",clock:"Reloj",textEditor:"Editor de texto",memory:"Juego de memoria",checkers:"Damas",quiz:"Cuestionario rápido"},
+      fr: {title:"Centre d'Applications",translator:"Traducteur",calendar:"Calendrier",converter:"Convertisseur",calculator:"Calculatrice",notes:"Notes",stopwatch:"Chronomètre",timer:"Minuteur",password:"Générateur de mots de passe",clock:"Horloge",textEditor:"Éditeur de texte",memory:"Jeu de mémoire",checkers:"Dames",quiz:"Quiz rapide"},
+      de: {title:"App Zentrum",translator:"Übersetzer",calendar:"Kalender",converter:"Konverter",calculator:"Rechner",notes:"Notizen",stopwatch:"Stoppuhr",timer:"Timer",password:"Passwortgenerator",clock:"Uhr",textEditor:"Texteditor",memory:"Gedächtnisspiel",checkers:"Dame",quiz:"Schnellquiz"},
+      tr: {title:"Uygulama Merkezi",translator:"Çevirici",calendar:"Takvim",converter:"Dönüştürücü",calculator:"Hesap Makinesi",notes:"Notlar",stopwatch:"Kronometre",timer:"Zamanlayıcı",password:"Şifre Oluşturucu",clock:"Saat",textEditor:"Metin Düzenleyici",memory:"Hafıza Oyunu",checkers:"Dama",quiz:"Hızlı Test"},
+      it: {title:"Centro App",translator:"Traduttore",calendar:"Calendario",converter:"Convertitore",calculator:"Calcolatrice",notes:"Note",stopwatch:"Cronometro",timer:"Timer",password:"Generatore di password",clock:"Orologio",textEditor:"Editor di testo",memory:"Gioco di memoria",checkers:"Dama",quiz:"Quiz veloce"},
+      zh: {title:"应用中心",translator:"翻译器",calendar:"日历",converter:"转换器",calculator:"计算器",notes:"笔记",stopwatch:"秒表",timer:"计时器",password:"密码生成器",clock:"时钟",textEditor:"文本编辑器",memory:"记忆游戏",checkers:"跳棋",quiz:"快速测验"},
+      ar: {title:"مركز التطبيقات",translator:"المترجم",calendar:"التقويم",converter:"المحول",calculator:"الآلة الحاسبة",notes:"الملاحظات",stopwatch:"ساعة التوقيف",timer:"المؤقت",password:"مولد كلمة المرور",clock:"الساعة",textEditor:"محرر النصوص",memory:"لعبة الذاكرة",checkers:"الداما",quiz:"اختبار سريع"}
+    };
+
+    const langSelect = document.getElementById("languageSelector");
+    const elements = document.querySelectorAll("[data-key]");
+    const titleEl = document.getElementById("title");
+
+    function applyLanguage(lang) {
+      const t = translations[lang] || translations["uz"];
+      titleEl.textContent = t.title;
+      elements.forEach(el => {
+        const key = el.getAttribute("data-key");
+        el.textContent = t[key];
+      });
+    }
+
+    const savedLang = localStorage.getItem("language") || "uz";
+    langSelect.value = savedLang;
+    applyLanguage(savedLang);
+
+    langSelect.addEventListener("change", () => {
+      const lang = langSelect.value;
+      localStorage.setItem("language", lang);
+      applyLanguage(lang);
+    });
+  </script>
+</body>
+</html>
